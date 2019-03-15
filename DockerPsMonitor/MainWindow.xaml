@@ -1,0 +1,107 @@
+﻿<Window x:Class="DockerPsMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DockerPsMonitor"
+        mc:Ignorable="d"
+        Icon="cargo_container_icon.ico"
+        Title="Dock PS monitor (1.5.0)" Height="450" Width="1024">
+    <Grid>
+        <Grid.Resources>
+
+            <LinearGradientBrush x:Key="Unhealthy" EndPoint="0,0.5" StartPoint="1,0.5">
+                <GradientStop Color="LightCoral" />
+                <GradientStop Color="LightPink" Offset="1" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Starting" EndPoint="0,0.5" StartPoint="1,0.5">
+                <GradientStop Color="Yellow" />
+                <GradientStop Color="LightYellow" Offset="1" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Healthy" EndPoint="0,0.5" StartPoint="1,0.5">
+                <GradientStop Color="LightGreen" />
+                <GradientStop Color="LightCyan" Offset="1" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Unknown" EndPoint="0,0.5" StartPoint="1,0.5">
+                <GradientStop Color="LightSkyBlue" />
+                <GradientStop Color="WhiteSmoke" Offset="1" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Exited" EndPoint="0,0.5" StartPoint="1,0.5">
+                <GradientStop Color="DarkGray" />
+                <GradientStop Color="LightGray" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Resources>
+
+        <DockPanel LastChildFill="True">
+            <Grid DockPanel.Dock="Top" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Copy ID to Clipboard" Command="{Binding CopyIdCommand}" Width="150" Margin="2" />
+                    <Button Content="View Log" Command="{Binding ViewLogCommand}" Width="100" Margin="2" />
+                </StackPanel>
+            </Grid>
+
+            <Grid DockPanel.Dock="Bottom" Height="30" Background="LightGray">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock Text="Show exited containers " />
+                    <CheckBox IsChecked="{Binding ShowExitedContainers}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Refresh rate (" />
+                    <TextBlock Text="{Binding RefreshRate}" />
+                    <TextBlock Text=" s)" />
+                    <Slider Minimum="1" Maximum="30" Value="{Binding RefreshRate}" Width="300"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid DockPanel.Dock="Bottom" Height="30" Background="Crimson">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DockerCommandError}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <TextBlock Text="{Binding DockerCommandError}" />
+            </Grid>
+
+            <ListView ItemsSource="{Binding ProcessInfos}" SelectedItem="{Binding SelectedContainer}">
+                <ListView.Resources>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Healthy">
+                                <Setter Property="Background" Value="{StaticResource Healthy}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Unhealthy">
+                                <Setter Property="Background" Value="{StaticResource Unhealthy}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Starting">
+                                <Setter Property="Background" Value="{StaticResource Starting}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Exited">
+                                <Setter Property="Background" Value="{StaticResource Exited}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Unknown">
+                                <Setter Property="Background" Value="{StaticResource Unknown}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Resources>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Id" Width="100" DisplayMemberBinding="{Binding ID}" />
+                        <GridViewColumn Header="Name" Width="250" DisplayMemberBinding="{Binding Names}" />
+                        <GridViewColumn Header="Status" Width="200" DisplayMemberBinding="{Binding Status}" />
+                        <GridViewColumn Header="Ports" Width="350" DisplayMemberBinding="{Binding Ports}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+        </DockPanel>
+    </Grid>
+</Window>
