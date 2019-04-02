@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DockerPsMonitor"
         mc:Ignorable="d"
         Icon="cargo_container_icon.ico"
-        Title="Dock PS monitor (1.5.0)" Height="450" Width="1024">
+        Title="Dock PS monitor (1.6.0)" Height="450" Width="1024">
     <Grid>
         <Grid.Resources>
 
@@ -42,6 +42,7 @@
                     <Button Content="Copy ID to Clipboard" Command="{Binding CopyIdCommand}" Width="150" Margin="2" />
                     <Button Content="View Log" Command="{Binding ViewLogCommand}" Width="100" Margin="2" />
                 </StackPanel>
+                <TextBlock HorizontalAlignment="Right" Text="{Binding ConnectionInfo}" Margin="5" />
             </Grid>
 
             <Grid DockPanel.Dock="Bottom" Height="30" Background="LightGray">
