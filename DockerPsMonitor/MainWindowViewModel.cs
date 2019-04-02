@@ -76,6 +76,8 @@ namespace DockerPsMonitor
             set => SetProperty(ref _dockerCommandError, value);
         }
 
+        public string ConnectionInfo => _dockerProvider.GetConnectionInfo();
+
         private void OnCopyId()
         {
             Clipboard.SetText(SelectedContainer.ID);
