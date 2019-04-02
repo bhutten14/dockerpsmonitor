@@ -27,5 +27,10 @@ namespace DockerPsMonitor
 
             return Task.FromResult((updatedProcessInfos, dockerCommandError));
         }
+
+        public string GetConnectionInfo()
+        {
+            return "local cmd";
+        }
     }
 }
