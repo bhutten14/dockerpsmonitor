@@ -12,31 +12,19 @@ namespace DockerPsMonitor
     {
         private SshClient _client;
 
-        public Task<(List<DockerProcessInfo>, string)> GetContainerInfoAsync(bool includeExitedContainers)
+        public Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
         {
             if (_client == null)
             {
                 _client = CreateSshClient();
             }
-            var rawOutput = "";
-            string dockerCommandError = null;
-            var updatedProcessInfos = new List<DockerProcessInfo>();
 
             var allFlag = includeExitedContainers ? "-a" : "";
-            try
-            {
-                var command = _client.CreateCommand("docker ps --format \"{{json .}}\" " + allFlag);
-                rawOutput = command.Execute();
-                var jsonLines = rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
-                    .ToList();
-                updatedProcessInfos = jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList();
-            }
-            catch
-            {
-                dockerCommandError = $"Error in executing docker command via SSH. [{rawOutput}]";
-            }
-
-            return Task.FromResult((updatedProcessInfos, dockerCommandError));
+            var command = _client.CreateCommand("docker ps --format \"{{json .}}\" " + allFlag);
+            var rawOutput = command.Execute();
+            var jsonLines = rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var updatedProcessInfos = jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList();
+            return Task.FromResult(updatedProcessInfos);
         }
 
         public string GetConnectionInfo()
@@ -44,6 +32,12 @@ namespace DockerPsMonitor
             var appReader = new AppSettingsReader();
             var sshAddress = (string)appReader.GetValue("SshAddress", typeof(string));
             return $"SSH: {sshAddress}";
+        }
+
+        public string GetLog(string containerId)
+        {
+            var command = _client.CreateCommand($"docker logs {containerId}");
+            return command.Execute();
         }
 
         private SshClient CreateSshClient()
