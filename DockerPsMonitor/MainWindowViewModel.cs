@@ -29,6 +29,11 @@ namespace DockerPsMonitor
             ViewLogCommand = new DelegateCommand(async () => await OnViewLog(), CanViewLog)
                                     .ObservesProperty(() => SelectedContainer);
             CopyIdCommand = new DelegateCommand(OnCopyId, CanViewLog).ObservesProperty(() => SelectedContainer);
+            StopCommand = new DelegateCommand(async () => await OnStop(), CanViewLog).ObservesProperty(() => SelectedContainer);
+            StartCommand = new DelegateCommand(async () => await OnStart(), CanViewLog).ObservesProperty(() => SelectedContainer);
+            KillCommand = new DelegateCommand(async () => await OnKill(), CanViewLog).ObservesProperty(() => SelectedContainer);
+            RestartCommand = new DelegateCommand(async () => await OnRestart(), CanViewLog).ObservesProperty(() => SelectedContainer);
+            RemoveCommand = new DelegateCommand(async () => await OnRemove(), CanViewLog).ObservesProperty(() => SelectedContainer);
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0) };
             _timer.Tick += OnTimerElapsed;
             _timer.Start();
@@ -71,6 +76,16 @@ namespace DockerPsMonitor
 
         public ICommand CopyIdCommand { get; set; }
 
+        public ICommand StopCommand { get; set; }
+
+        public ICommand StartCommand { get; set; }
+
+        public ICommand KillCommand { get; set; }
+
+        public ICommand RestartCommand { get; set; }
+
+        public ICommand RemoveCommand { get; set; }
+
         public string DockerCommandError
         {
             get => _dockerCommandError;
@@ -92,7 +107,7 @@ namespace DockerPsMonitor
         private Task OnViewLog()
         {
             var containerId = SelectedContainer.ID;
-            string rawOutput = "";
+            var rawOutput = "";
             try
             {
                 rawOutput = _dockerProvider.GetLog(containerId);
@@ -104,6 +119,81 @@ namespace DockerPsMonitor
             }
             var newLogWindow = new LogOutputWindow(rawOutput, SelectedContainer.Names);
             newLogWindow.Show();
+            return Task.CompletedTask;
+        }
+
+        private Task OnRemove()
+        {
+            var containerId = SelectedContainer.ID;
+            var rawOutput = "";
+            try
+            {
+                rawOutput = _dockerProvider.Remove(containerId);
+            }
+            catch
+            {
+                DockerCommandError = $"Error removing container. [{rawOutput}]";
+            }
+            return Task.CompletedTask;
+        }
+
+        private Task OnRestart()
+        {
+            var containerId = SelectedContainer.ID;
+            var rawOutput = "";
+            try
+            {
+                rawOutput = _dockerProvider.Restart(containerId);
+            }
+            catch
+            {
+                DockerCommandError = $"Error restarting container. [{rawOutput}]";
+            }
+            return Task.CompletedTask;
+        }
+
+        private Task OnKill()
+        {
+            var containerId = SelectedContainer.ID;
+            var rawOutput = "";
+            try
+            {
+                rawOutput = _dockerProvider.Kill(containerId);
+            }
+            catch
+            {
+                DockerCommandError = $"Error killing container. [{rawOutput}]";
+            }
+            return Task.CompletedTask;
+        }
+
+        private Task OnStart()
+        {
+            var containerId = SelectedContainer.ID;
+            var rawOutput = "";
+            try
+            {
+                rawOutput = _dockerProvider.Start(containerId);
+            }
+            catch
+            {
+                DockerCommandError = $"Error starting container. [{rawOutput}]";
+            }
+            return Task.CompletedTask;
+        }
+
+        private Task OnStop()
+        {
+            var containerId = SelectedContainer.ID;
+            var rawOutput = "";
+            try
+            {
+                rawOutput = _dockerProvider.Stop(containerId);
+            }
+            catch
+            {
+                DockerCommandError = $"Error stopping container. [{rawOutput}]";
+            }
             return Task.CompletedTask;
         }
 
