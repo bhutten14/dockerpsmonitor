@@ -26,5 +26,30 @@ namespace DockerPsMonitor
         {
             return DockerCliCommand.ExecuteDockerCommand($"logs {containerId}");
         }
+
+        public string Stop(string containerId)
+        {
+            return DockerCliCommand.ExecuteDockerCommand($"stop {containerId}");
+        }
+
+        public string Start(string containerId)
+        {
+            return DockerCliCommand.ExecuteDockerCommand($"start {containerId}");
+        }
+
+        public string Kill(string containerId)
+        {
+            return DockerCliCommand.ExecuteDockerCommand($"kill {containerId}");
+        }
+
+        public string Restart(string containerId)
+        {
+            return DockerCliCommand.ExecuteDockerCommand($"restart {containerId}");
+        }
+
+        public string Remove(string containerId)
+        {
+            return DockerCliCommand.ExecuteDockerCommand($"rm {containerId}");
+        }
     }
 }
