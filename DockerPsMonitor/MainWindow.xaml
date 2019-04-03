@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DockerPsMonitor"
         mc:Ignorable="d"
         Icon="cargo_container_icon.ico"
-        Title="Dock PS monitor (1.6.1)" Height="450" Width="1024">
+        Title="Dock PS monitor (1.7.0)" Height="450" Width="1024">
     <Grid>
         <Grid.Resources>
 
@@ -41,6 +41,11 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Copy ID to Clipboard" Command="{Binding CopyIdCommand}" Width="150" Margin="2" />
                     <Button Content="View Log" Command="{Binding ViewLogCommand}" Width="100" Margin="2" />
+                    <Button Content="Stop" Command="{Binding StopCommand}" Width="100" Margin="2" />
+                    <Button Content="Start" Command="{Binding StartCommand}" Width="100" Margin="2" />
+                    <Button Content="Kill" Command="{Binding KillCommand}" Width="100" Margin="2" />
+                    <Button Content="Restart" Command="{Binding RestartCommand}" Width="100" Margin="2" />
+                    <Button Content="Remove" Command="{Binding RemoveCommand}" Width="100" Margin="2" />
                 </StackPanel>
                 <TextBlock HorizontalAlignment="Right" Text="{Binding ConnectionInfo}" Margin="5" />
             </Grid>
