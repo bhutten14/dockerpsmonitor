@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -94,7 +95,7 @@ namespace DockerPsMonitor
             string rawOutput = "";
             try
             {
-                rawOutput = DockerCliCommand.ExecuteDockerCommand($"logs {containerId}");
+                rawOutput = _dockerProvider.GetLog(containerId);
             }
             catch
             {
@@ -116,8 +117,15 @@ namespace DockerPsMonitor
 
         private async Task RefreshProcessInfoAsync()
         {
-            var (updatedProcessInfos, errorMessage) = await _dockerProvider.GetContainerInfoAsync(ShowExitedContainers);
-            DockerCommandError = errorMessage;
+            var updatedProcessInfos = new List<DockerProcessInfo>();
+            try
+            {
+                updatedProcessInfos = await _dockerProvider.GetContainerInfoAsync(ShowExitedContainers);
+            }
+            catch (Exception exception)
+            {
+                DockerCommandError = $"Error in executing docker command. [{exception.Message}]";
+            }
             var addedItems = updatedProcessInfos.Except(ProcessInfos, new DockerProcessInfoComparer()).ToList();
             var removedItems = ProcessInfos.Except(updatedProcessInfos, new DockerProcessInfoComparer()).ToList();
             var updatedItems = updatedProcessInfos.Where(p1 => ProcessInfos.Any(p2 => p1.ID.Equals(p2.ID))).ToList();
