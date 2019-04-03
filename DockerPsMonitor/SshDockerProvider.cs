@@ -40,6 +40,36 @@ namespace DockerPsMonitor
             return command.Execute();
         }
 
+        public string Stop(string containerId)
+        {
+            var command = _client.CreateCommand($"docker stop {containerId}");
+            return command.Execute();
+        }
+
+        public string Start(string containerId)
+        {
+            var command = _client.CreateCommand($"docker start {containerId}");
+            return command.Execute();
+        }
+
+        public string Kill(string containerId)
+        {
+            var command = _client.CreateCommand($"docker kill {containerId}");
+            return command.Execute();
+        }
+
+        public string Restart(string containerId)
+        {
+            var command = _client.CreateCommand($"docker restart {containerId}");
+            return command.Execute();
+        }
+
+        public string Remove(string containerId)
+        {
+            var command = _client.CreateCommand($"docker rm {containerId}");
+            return command.Execute();
+        }
+
         private SshClient CreateSshClient()
         {
             var appReader = new AppSettingsReader();
