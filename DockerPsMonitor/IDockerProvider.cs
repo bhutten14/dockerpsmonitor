@@ -7,11 +7,11 @@ namespace DockerPsMonitor
     {
         Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers);
         string GetConnectionInfo();
-        string GetLog(string containerId);
-        string Stop(string containerId);
-        string Start(string containerId);
-        string Kill(string containerId);
-        string Restart(string containerId);
-        string Remove(string containerId);
+        Task<string> GetLogAsync(string containerId);
+        Task<string> StopAsync(string containerId);
+        Task<string> StartAsync(string containerId);
+        Task<string> KillAsync(string containerId);
+        Task<string> RestartAsync(string containerId);
+        Task<string> RemoveAsync(string containerId);
     }
 }
