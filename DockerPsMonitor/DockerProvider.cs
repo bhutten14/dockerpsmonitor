@@ -8,13 +8,13 @@ namespace DockerPsMonitor
 {
     public class DockerProvider : IDockerProvider
     {
-        public Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
+        public async Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
         {
             var allFlag = includeExitedContainers ? "-a" : "";
-            var rawOutput = DockerCliCommand.ExecuteDockerCommand("ps --format \"{{json .}}\" " + allFlag);
-            var jsonLines = rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            var updatedProcessInfos = jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList();
-            return Task.FromResult(updatedProcessInfos);
+            var rawOutput = await DockerCliCommand.ExecuteDockerCommandAsync("ps --format \"{{json .}}\" " + allFlag);
+            var jsonLines = await Task.Run(() => rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList());
+            var updatedProcessInfos = await Task.Run(() => jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList());
+            return updatedProcessInfos;
         }
 
         public string GetConnectionInfo()
@@ -22,34 +22,34 @@ namespace DockerPsMonitor
             return "local cmd";
         }
 
-        public string GetLog(string containerId)
+        public Task<string> GetLogAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"logs {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"logs {containerId}");
         }
 
-        public string Stop(string containerId)
+        public Task<string> StopAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"stop {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"stop {containerId}");
         }
 
-        public string Start(string containerId)
+        public Task<string> StartAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"start {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"start {containerId}");
         }
 
-        public string Kill(string containerId)
+        public Task<string> KillAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"kill {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"kill {containerId}");
         }
 
-        public string Restart(string containerId)
+        public Task<string> RestartAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"restart {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"restart {containerId}");
         }
 
-        public string Remove(string containerId)
+        public Task<string> RemoveAsync(string containerId)
         {
-            return DockerCliCommand.ExecuteDockerCommand($"rm {containerId}");
+            return DockerCliCommand.ExecuteDockerCommandAsync($"rm {containerId}");
         }
     }
 }
