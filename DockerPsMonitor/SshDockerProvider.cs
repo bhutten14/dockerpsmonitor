@@ -12,7 +12,7 @@ namespace DockerPsMonitor
     {
         private SshClient _client;
 
-        public Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
+        public async Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
         {
             if (_client == null)
             {
@@ -21,10 +21,10 @@ namespace DockerPsMonitor
 
             var allFlag = includeExitedContainers ? "-a" : "";
             var command = _client.CreateCommand("docker ps --format \"{{json .}}\" " + allFlag);
-            var rawOutput = command.Execute();
-            var jsonLines = rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            var updatedProcessInfos = jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList();
-            return Task.FromResult(updatedProcessInfos);
+            var rawOutput = await Task.Run(() => command.Execute());
+            var jsonLines = await Task.Run(() => rawOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList());
+            var updatedProcessInfos = await Task.Run(() => jsonLines.Select(JsonConvert.DeserializeObject<DockerProcessInfo>).ToList());
+            return updatedProcessInfos;
         }
 
         public string GetConnectionInfo()
@@ -34,40 +34,40 @@ namespace DockerPsMonitor
             return $"SSH: {sshAddress}";
         }
 
-        public string GetLog(string containerId)
+        public Task<string> GetLogAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker logs {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
-        public string Stop(string containerId)
+        public Task<string>  StopAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker stop {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
-        public string Start(string containerId)
+        public Task<string>  StartAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker start {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
-        public string Kill(string containerId)
+        public Task<string>  KillAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker kill {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
-        public string Restart(string containerId)
+        public Task<string>  RestartAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker restart {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
-        public string Remove(string containerId)
+        public Task<string>  RemoveAsync(string containerId)
         {
             var command = _client.CreateCommand($"docker rm {containerId}");
-            return command.Execute();
+            return Task.Run(() => command.Execute());
         }
 
         private SshClient CreateSshClient()

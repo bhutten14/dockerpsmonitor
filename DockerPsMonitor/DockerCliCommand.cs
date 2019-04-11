@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +7,7 @@ namespace DockerPsMonitor
 {
     public static class DockerCliCommand
     {
-        public static string ExecuteDockerCommand(string commandArgs)
+        private static string ExecuteDockerCommand(string commandArgs)
         {
             var processInfo = new ProcessStartInfo
             {
@@ -43,6 +41,11 @@ namespace DockerPsMonitor
             process.Close();
             var output = sb.ToString();
             return output;
+        }
+
+        public static Task<string> ExecuteDockerCommandAsync(string commandArgs)
+        {
+            return Task.Run(() => ExecuteDockerCommand(commandArgs));
         }
     }
 }
