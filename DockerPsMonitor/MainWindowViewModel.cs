@@ -26,14 +26,13 @@ namespace DockerPsMonitor
             _dockerProvider = dockerProvider;
             RefreshRate = 2;
             ShowExitedContainers = true;
-            ViewLogCommand = new DelegateCommand(async () => await OnViewLog(), CanViewLog)
-                                    .ObservesProperty(() => SelectedContainer);
+            ViewLogCommand = new DelegateCommand(OnViewLog, CanViewLog).ObservesProperty(() => SelectedContainer);
             CopyIdCommand = new DelegateCommand(OnCopyId, CanViewLog).ObservesProperty(() => SelectedContainer);
-            StopCommand = new DelegateCommand(async () => await OnStop(), CanViewLog).ObservesProperty(() => SelectedContainer);
-            StartCommand = new DelegateCommand(async () => await OnStart(), CanViewLog).ObservesProperty(() => SelectedContainer);
-            KillCommand = new DelegateCommand(async () => await OnKill(), CanViewLog).ObservesProperty(() => SelectedContainer);
-            RestartCommand = new DelegateCommand(async () => await OnRestart(), CanViewLog).ObservesProperty(() => SelectedContainer);
-            RemoveCommand = new DelegateCommand(async () => await OnRemove(), CanViewLog).ObservesProperty(() => SelectedContainer);
+            StopCommand = new DelegateCommand(OnStop, CanViewLog).ObservesProperty(() => SelectedContainer);
+            StartCommand = new DelegateCommand(OnStart, CanViewLog).ObservesProperty(() => SelectedContainer);
+            KillCommand = new DelegateCommand(OnKill, CanViewLog).ObservesProperty(() => SelectedContainer);
+            RestartCommand = new DelegateCommand(OnRestart, CanViewLog).ObservesProperty(() => SelectedContainer);
+            RemoveCommand = new DelegateCommand(OnRemove, CanViewLog).ObservesProperty(() => SelectedContainer);
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0) };
             _timer.Tick += OnTimerElapsed;
             _timer.Start();
@@ -104,97 +103,92 @@ namespace DockerPsMonitor
             return SelectedContainer != null;
         }
 
-        private Task OnViewLog()
+        private async void OnViewLog()
         {
+            var newLogWindow = new LogOutputWindow("Loading log lines ...", SelectedContainer.Names);
+            newLogWindow.Show();
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.GetLog(containerId);
+                rawOutput = await _dockerProvider.GetLogAsync(containerId);
+                newLogWindow.MainTextBox.Text = rawOutput;
             }
             catch
             {
-                DockerCommandError = $"Error in getting log. [{rawOutput}]";
-                return Task.CompletedTask;
+                DockerCommandError = $"Error getting log. [{rawOutput}]";
+                newLogWindow.Close();
             }
-            var newLogWindow = new LogOutputWindow(rawOutput, SelectedContainer.Names);
-            newLogWindow.Show();
-            return Task.CompletedTask;
         }
 
-        private Task OnRemove()
+        private async void OnRemove()
         {
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.Remove(containerId);
+                rawOutput = await _dockerProvider.RemoveAsync(containerId);
             }
             catch
             {
                 DockerCommandError = $"Error removing container. [{rawOutput}]";
             }
-            return Task.CompletedTask;
         }
 
-        private Task OnRestart()
+        private async void OnRestart()
         {
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.Restart(containerId);
+                rawOutput = await _dockerProvider.RestartAsync(containerId);
             }
             catch
             {
                 DockerCommandError = $"Error restarting container. [{rawOutput}]";
             }
-            return Task.CompletedTask;
         }
 
-        private Task OnKill()
+        private async void OnKill()
         {
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.Kill(containerId);
+                rawOutput = await _dockerProvider.KillAsync(containerId);
             }
             catch
             {
                 DockerCommandError = $"Error killing container. [{rawOutput}]";
             }
-            return Task.CompletedTask;
         }
 
-        private Task OnStart()
+        private async void OnStart()
         {
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.Start(containerId);
+                rawOutput = await _dockerProvider.StartAsync(containerId);
             }
             catch
             {
                 DockerCommandError = $"Error starting container. [{rawOutput}]";
             }
-            return Task.CompletedTask;
         }
 
-        private Task OnStop()
+        private async void OnStop()
         {
             var containerId = SelectedContainer.ID;
             var rawOutput = "";
             try
             {
-                rawOutput = _dockerProvider.Stop(containerId);
+                rawOutput = await _dockerProvider.StopAsync(containerId);
             }
             catch
             {
                 DockerCommandError = $"Error stopping container. [{rawOutput}]";
             }
-            return Task.CompletedTask;
         }
 
         private async void OnTimerElapsed(object sender, EventArgs eventArgs)
@@ -208,6 +202,7 @@ namespace DockerPsMonitor
         private async Task RefreshProcessInfoAsync()
         {
             var updatedProcessInfos = new List<DockerProcessInfo>();
+            DockerCommandError = null;
             try
             {
                 updatedProcessInfos = await _dockerProvider.GetContainerInfoAsync(ShowExitedContainers);
