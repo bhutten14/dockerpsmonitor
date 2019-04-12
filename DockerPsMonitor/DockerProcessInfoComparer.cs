@@ -14,7 +14,7 @@ namespace DockerPsMonitor
                 return false;
 
             //Check whether the properties are equal.
-            return p1.ID.Equals(p2.ID);
+            return p1.Id.Equals(p2.Id);
         }
 
         // If Equals() returns true for a pair of objects 
@@ -23,7 +23,7 @@ namespace DockerPsMonitor
         public int GetHashCode(DockerProcessInfo dockerProcessInfo)
         {
             //Calculate the hash code
-            return dockerProcessInfo.ID == null ? 0 : dockerProcessInfo.ID.GetHashCode();
+            return dockerProcessInfo.Id == null ? 0 : dockerProcessInfo.Id.GetHashCode();
         }
     }
 }
