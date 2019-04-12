@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DockerPsMonitor"
         mc:Ignorable="d"
         Icon="cargo_container_icon.ico"
-        Title="Dock PS monitor (1.7.1)" Height="450" Width="1024">
+        Title="Dock PS monitor (1.7.2)" Height="450" Width="1024">
     <Grid>
         <Grid.Resources>
 
