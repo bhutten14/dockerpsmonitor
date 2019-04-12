@@ -95,7 +95,7 @@ namespace DockerPsMonitor
 
         private void OnCopyId()
         {
-            Clipboard.SetText(SelectedContainer.ID);
+            Clipboard.SetText(SelectedContainer.Id);
         }
 
         private bool CanViewLog()
@@ -107,7 +107,7 @@ namespace DockerPsMonitor
         {
             var newLogWindow = new LogOutputWindow("Loading log lines ...", SelectedContainer.Names);
             newLogWindow.Show();
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -123,7 +123,7 @@ namespace DockerPsMonitor
 
         private async void OnRemove()
         {
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -137,7 +137,7 @@ namespace DockerPsMonitor
 
         private async void OnRestart()
         {
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -151,7 +151,7 @@ namespace DockerPsMonitor
 
         private async void OnKill()
         {
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -165,7 +165,7 @@ namespace DockerPsMonitor
 
         private async void OnStart()
         {
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -179,7 +179,7 @@ namespace DockerPsMonitor
 
         private async void OnStop()
         {
-            var containerId = SelectedContainer.ID;
+            var containerId = SelectedContainer.Id;
             var rawOutput = "";
             try
             {
@@ -213,10 +213,10 @@ namespace DockerPsMonitor
             }
             var addedItems = updatedProcessInfos.Except(ProcessInfos, new DockerProcessInfoComparer()).ToList();
             var removedItems = ProcessInfos.Except(updatedProcessInfos, new DockerProcessInfoComparer()).ToList();
-            var updatedItems = updatedProcessInfos.Where(p1 => ProcessInfos.Any(p2 => p1.ID.Equals(p2.ID))).ToList();
+            var updatedItems = updatedProcessInfos.Where(p1 => ProcessInfos.Any(p2 => p1.Id.Equals(p2.Id))).ToList();
             foreach (var dockerProcessInfo in removedItems)
             {
-                var toBeRemoved = ProcessInfos.Single(p => p.ID.Equals(dockerProcessInfo.ID));
+                var toBeRemoved = ProcessInfos.Single(p => p.Id.Equals(dockerProcessInfo.Id));
                 ProcessInfos.Remove(toBeRemoved);
             }
             foreach (var dockerProcessInfo in addedItems)
@@ -225,7 +225,7 @@ namespace DockerPsMonitor
             }
             foreach (var dockerProcessInfo in updatedItems)
             {
-                var toBeUpdatedItem = ProcessInfos.Single(p => p.ID.Equals(dockerProcessInfo.ID));
+                var toBeUpdatedItem = ProcessInfos.Single(p => p.Id.Equals(dockerProcessInfo.Id));
                 toBeUpdatedItem.Status = dockerProcessInfo.Status;
                 toBeUpdatedItem.Names = dockerProcessInfo.Names;
                 toBeUpdatedItem.Ports = dockerProcessInfo.Ports;
