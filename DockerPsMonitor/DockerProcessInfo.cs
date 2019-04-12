@@ -11,7 +11,7 @@ namespace DockerPsMonitor
         private string _ports;
         private ContainerStatus _containerStatus;
 
-        public string ID
+        public string Id
         {
             get => _id;
             set => SetProperty(ref _id, value);
@@ -49,7 +49,7 @@ namespace DockerPsMonitor
                 {
                     ContainerStatus = ContainerStatus.Unknown;
                 }
-                OnPropertyChanged(nameof(Status));
+                RaisePropertyChanged(nameof(Status));
             }
         }
 
