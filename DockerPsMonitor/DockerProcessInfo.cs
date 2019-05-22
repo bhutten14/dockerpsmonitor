@@ -11,7 +11,7 @@ namespace DockerPsMonitor
         private string _ports;
         private ContainerStatus _containerStatus;
 
-        public string Id
+        public string ID
         {
             get => _id;
             set => SetProperty(ref _id, value);
