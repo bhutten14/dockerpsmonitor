@@ -20,9 +20,18 @@ namespace DockerPsMonitor
         private DockerProcessInfo _selectedContainer;
         private string _dockerCommandError;
         private readonly IDockerProvider _dockerProvider;
+        private ObservableCollection<ConnectionItemData> _connectionItems;
+        private ConnectionItemData _selectedConnectionItem;
 
         public MainWindowViewModel(IDockerProvider dockerProvider)
         {
+            _connectionItems = new ObservableCollection<ConnectionItemData> { new ConnectionItemData
+            {
+                Mode = ConnectionModeEnum.CMD,
+                Name = "local cmd",
+                Address = "local cmd"
+            }};
+            SelectedConnectionItem = _connectionItems.First();
             _dockerProvider = dockerProvider;
             RefreshRate = 2;
             ShowExitedContainers = true;
@@ -33,6 +42,7 @@ namespace DockerPsMonitor
             KillCommand = new DelegateCommand(OnKill, CanViewLog).ObservesProperty(() => SelectedContainer);
             RestartCommand = new DelegateCommand(OnRestart, CanViewLog).ObservesProperty(() => SelectedContainer);
             RemoveCommand = new DelegateCommand(OnRemove, CanViewLog).ObservesProperty(() => SelectedContainer);
+            AddConnectionItemCommand = new DelegateCommand(OnAddConnectionItem);
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0) };
             _timer.Tick += OnTimerElapsed;
             _timer.Start();
@@ -71,6 +81,12 @@ namespace DockerPsMonitor
             set => SetProperty(ref _selectedContainer, value);
         }
 
+        public ObservableCollection<ConnectionItemData> ConnectionItems
+        {
+            get => _connectionItems;
+            set => SetProperty(ref _connectionItems, value);
+        }
+
         public ICommand ViewLogCommand { get; set; }
 
         public ICommand CopyIdCommand { get; set; }
@@ -85,10 +101,18 @@ namespace DockerPsMonitor
 
         public ICommand RemoveCommand { get; set; }
 
+        public ICommand AddConnectionItemCommand { get; set; }
+
         public string DockerCommandError
         {
             get => _dockerCommandError;
             set => SetProperty(ref _dockerCommandError, value);
+        }
+
+        public ConnectionItemData SelectedConnectionItem
+        {
+            get => _selectedConnectionItem;
+            set => SetProperty(ref _selectedConnectionItem, value);
         }
 
         public string ConnectionInfo => _dockerProvider.GetConnectionInfo();
@@ -230,6 +254,17 @@ namespace DockerPsMonitor
                 toBeUpdatedItem.Names = dockerProcessInfo.Names;
                 toBeUpdatedItem.Ports = dockerProcessInfo.Ports;
             }
+        }
+
+        private void OnAddConnectionItem()
+        {
+            var newItem = new ConnectionItemData
+            {
+                Name = "New item", 
+                Mode = ConnectionModeEnum.SSH
+            };
+            ConnectionItems.Add(newItem);
+            SelectedConnectionItem = newItem;
         }
     }
 }

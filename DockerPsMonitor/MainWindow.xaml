@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DockerPsMonitor"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
         mc:Ignorable="d"
         Icon="cargo_container_icon.ico"
-        Title="Dock PS monitor (1.7.3)" Height="450" Width="1024">
+        Title="Dock PS monitor (1.7.3)" Height="450" Width="1100">
     <Grid>
         <Grid.Resources>
 
@@ -76,38 +77,64 @@
                 <TextBlock Text="{Binding DockerCommandError}" />
             </Grid>
 
-            <ListView ItemsSource="{Binding ProcessInfos}" SelectedItem="{Binding SelectedContainer}">
-                <ListView.Resources>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Healthy">
-                                <Setter Property="Background" Value="{StaticResource Healthy}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Unhealthy">
-                                <Setter Property="Background" Value="{StaticResource Unhealthy}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Starting">
-                                <Setter Property="Background" Value="{StaticResource Starting}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Exited">
-                                <Setter Property="Background" Value="{StaticResource Exited}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ContainerStatus}" Value="Unknown">
-                                <Setter Property="Background" Value="{StaticResource Unknown}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.Resources>
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Id" Width="100" DisplayMemberBinding="{Binding ID}" />
-                        <GridViewColumn Header="Name" Width="250" DisplayMemberBinding="{Binding Names}" />
-                        <GridViewColumn Header="Status" Width="200" DisplayMemberBinding="{Binding Status}" />
-                        <GridViewColumn Header="Ports" Width="350" DisplayMemberBinding="{Binding Ports}" />
-                    </GridView>
-                </ListView.View>
-            </ListView>
-
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0" LastChildFill="True">
+                    <Button Content="+" Height="30" DockPanel.Dock="Bottom" Command="{Binding AddConnectionItemCommand}" ToolTip="Add new connection item" />
+                    <ListBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ConnectionItems}"
+                                                          SelectedItem="{Binding SelectedConnectionItem, Mode=TwoWay}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.Resources>
+                            <Style TargetType="{x:Type Expander}">
+                                <Setter Property="IsExpanded" Value="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"/>
+                            </Style>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Padding" Value="0"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <local:ConnectionItemControl Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=ActualWidth}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                <ListView Grid.Column="2" ItemsSource="{Binding ProcessInfos}" SelectedItem="{Binding SelectedContainer}">
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ContainerStatus}" Value="Healthy">
+                                    <Setter Property="Background" Value="{StaticResource Healthy}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ContainerStatus}" Value="Unhealthy">
+                                    <Setter Property="Background" Value="{StaticResource Unhealthy}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ContainerStatus}" Value="Starting">
+                                    <Setter Property="Background" Value="{StaticResource Starting}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ContainerStatus}" Value="Exited">
+                                    <Setter Property="Background" Value="{StaticResource Exited}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ContainerStatus}" Value="Unknown">
+                                    <Setter Property="Background" Value="{StaticResource Unknown}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Id" Width="100" DisplayMemberBinding="{Binding ID}" />
+                            <GridViewColumn Header="Name" Width="250" DisplayMemberBinding="{Binding Names}" />
+                            <GridViewColumn Header="Status" Width="200" DisplayMemberBinding="{Binding Status}" />
+                            <GridViewColumn Header="Ports" Width="370" DisplayMemberBinding="{Binding Ports}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
         </DockPanel>
     </Grid>
 </Window>
