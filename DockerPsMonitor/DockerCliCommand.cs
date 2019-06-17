@@ -7,6 +7,8 @@ namespace DockerPsMonitor
 {
     public static class DockerCliCommand
     {
+        private static object _lockObject = new object();
+
         private static string ExecuteDockerCommand(string commandArgs)
         {
             var processInfo = new ProcessStartInfo
@@ -30,10 +32,15 @@ namespace DockerPsMonitor
             process.BeginErrorReadLine();
             void OnDataReceived(string data)
             {
-                if (!String.IsNullOrEmpty(data))
+                lock (_lockObject)
                 {
-                    data = data.EndsWith(System.Environment.NewLine) || data.EndsWith("\n") ? data : data + Environment.NewLine;
-                    sb.Append(data);
+                    if (!String.IsNullOrEmpty(data))
+                    {
+                        data = data.EndsWith(System.Environment.NewLine) || data.EndsWith("\n")
+                            ? data
+                            : data + Environment.NewLine;
+                        sb.Append(data);
+                    }
                 }
             }
 

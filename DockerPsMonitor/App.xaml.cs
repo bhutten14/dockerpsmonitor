@@ -1,6 +1,4 @@
-﻿using System;
-using System.Configuration;
-using System.Windows;
+﻿using System.Windows;
 
 namespace DockerPsMonitor
 {
@@ -11,19 +9,10 @@ namespace DockerPsMonitor
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            var appReader = new AppSettingsReader();
-            var mode = (string)appReader.GetValue("Mode", typeof(string));
-            IDockerProvider dockerProvider = null;
-            if (mode.Equals("CMD", StringComparison.OrdinalIgnoreCase))
+            var mainWindow = new MainWindow
             {
-                dockerProvider = new DockerProvider();
-            }
-            else if (mode.Equals("SSH", StringComparison.OrdinalIgnoreCase))
-            {
-                dockerProvider = new SshDockerProvider();
-            }
-
-            var mainWindow = new MainWindow(dockerProvider);
+                DataContext = new MainWindowViewModel(new DockerProviderFactory())
+            };
             mainWindow.ShowDialog();
         }
     }

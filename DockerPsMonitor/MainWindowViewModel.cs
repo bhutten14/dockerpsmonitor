@@ -19,20 +19,15 @@ namespace DockerPsMonitor
         private bool _showExitedContainers;
         private DockerProcessInfo _selectedContainer;
         private string _dockerCommandError;
-        private readonly IDockerProvider _dockerProvider;
-        private ObservableCollection<ConnectionItemData> _connectionItems;
-        private ConnectionItemData _selectedConnectionItem;
+        private IDockerProvider _dockerProvider;
+        private ObservableCollection<ConnectionItemViewModel> _connectionItems;
+        private ConnectionItemViewModel _selectedConnectionItem;
+        private readonly IDockerProviderFactory _dockerProviderFactory;
 
-        public MainWindowViewModel(IDockerProvider dockerProvider)
+        public MainWindowViewModel(IDockerProviderFactory dockerProviderFactory)
         {
-            _connectionItems = new ObservableCollection<ConnectionItemData> { new ConnectionItemData
-            {
-                Mode = ConnectionModeEnum.CMD,
-                Name = "local cmd",
-                Address = "local cmd"
-            }};
-            SelectedConnectionItem = _connectionItems.First();
-            _dockerProvider = dockerProvider;
+            _dockerProviderFactory = dockerProviderFactory;
+            ReadConnections();
             RefreshRate = 2;
             ShowExitedContainers = true;
             ViewLogCommand = new DelegateCommand(OnViewLog, CanViewLog).ObservesProperty(() => SelectedContainer);
@@ -43,6 +38,7 @@ namespace DockerPsMonitor
             RestartCommand = new DelegateCommand(OnRestart, CanViewLog).ObservesProperty(() => SelectedContainer);
             RemoveCommand = new DelegateCommand(OnRemove, CanViewLog).ObservesProperty(() => SelectedContainer);
             AddConnectionItemCommand = new DelegateCommand(OnAddConnectionItem);
+            RemoveConnectionItemCommand = new DelegateCommand(OnRemoveConnectionItem, CanRemoveConnectionItem).ObservesProperty(() => SelectedConnectionItem);
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0) };
             _timer.Tick += OnTimerElapsed;
             _timer.Start();
@@ -81,7 +77,7 @@ namespace DockerPsMonitor
             set => SetProperty(ref _selectedContainer, value);
         }
 
-        public ObservableCollection<ConnectionItemData> ConnectionItems
+        public ObservableCollection<ConnectionItemViewModel> ConnectionItems
         {
             get => _connectionItems;
             set => SetProperty(ref _connectionItems, value);
@@ -103,16 +99,28 @@ namespace DockerPsMonitor
 
         public ICommand AddConnectionItemCommand { get; set; }
 
+        public ICommand RemoveConnectionItemCommand { get; set; }
+
         public string DockerCommandError
         {
             get => _dockerCommandError;
             set => SetProperty(ref _dockerCommandError, value);
         }
 
-        public ConnectionItemData SelectedConnectionItem
+        public ConnectionItemViewModel SelectedConnectionItem
         {
             get => _selectedConnectionItem;
-            set => SetProperty(ref _selectedConnectionItem, value);
+            set
+            {
+                _timer?.Stop();
+                _processInfos.Clear();
+                SetProperty(ref _selectedConnectionItem, value);
+                if (SelectedConnectionItem != null)
+                {
+                    _dockerProvider = _dockerProviderFactory.CreateDockerProvider(SelectedConnectionItem);
+                }
+                _timer?.Start();
+            }
         }
 
         public string ConnectionInfo => _dockerProvider.GetConnectionInfo();
@@ -258,13 +266,33 @@ namespace DockerPsMonitor
 
         private void OnAddConnectionItem()
         {
-            var newItem = new ConnectionItemData
-            {
-                Name = "New item", 
-                Mode = ConnectionModeEnum.SSH
-            };
+            var newItem = new ConnectionItemViewModel(ConnectionModeEnum.SSH, "New item", "");
             ConnectionItems.Add(newItem);
             SelectedConnectionItem = newItem;
+        }
+
+        private void OnRemoveConnectionItem()
+        {
+            if (SelectedConnectionItem != null && SelectedConnectionItem.Mode != ConnectionModeEnum.CMD)
+            {
+                ConnectionItems.Remove(SelectedConnectionItem);
+                SelectedConnectionItem = ConnectionItems.Last();
+            }
+        }
+
+        private bool CanRemoveConnectionItem()
+        {
+            return SelectedConnectionItem?.Mode != ConnectionModeEnum.CMD;
+        }
+
+        private void ReadConnections()
+        {
+            //Default one connection is available, knowing the CMD mode connection
+            _connectionItems = new ObservableCollection<ConnectionItemViewModel>
+            {
+                new ConnectionItemViewModel(ConnectionModeEnum.CMD, "local cmd", "local cmd")
+            };
+            SelectedConnectionItem = _connectionItems.First();
         }
     }
 }
