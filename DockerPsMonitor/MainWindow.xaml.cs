@@ -1,18 +1,13 @@
-﻿using System.Windows;
-
-namespace DockerPsMonitor
+﻿namespace DockerPsMonitor
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow
     {
-        public MainWindow() { }
-
-        public MainWindow(IDockerProvider dockerProvider)
+        public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel(dockerProvider);
         }
     }
 }

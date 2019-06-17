@@ -38,6 +38,7 @@
         </Grid.Resources>
 
         <DockPanel LastChildFill="True">
+            <!-- Button bar -->
             <Grid DockPanel.Dock="Top" Height="30">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Copy ID to Clipboard" Command="{Binding CopyIdCommand}" Width="150" Margin="2" />
@@ -51,6 +52,7 @@
                 <TextBlock HorizontalAlignment="Right" Text="{Binding ConnectionInfo}" Margin="5" />
             </Grid>
 
+            <!-- Status bar -->
             <Grid DockPanel.Dock="Bottom" Height="30" Background="LightGray">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="Show exited containers " />
@@ -64,6 +66,7 @@
                 </StackPanel>
             </Grid>
 
+            <!-- Error message -->
             <Grid DockPanel.Dock="Bottom" Height="30" Background="Crimson">
                 <Grid.Style>
                     <Style TargetType="Grid">
@@ -83,8 +86,13 @@
                     <ColumnDefinition Width="5" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
+
+                <!-- Connections list -->
                 <DockPanel Grid.Column="0" LastChildFill="True">
-                    <Button Content="+" Height="30" DockPanel.Dock="Bottom" Command="{Binding AddConnectionItemCommand}" ToolTip="Add new connection item" />
+                    <UniformGrid Columns="2" Height="30" DockPanel.Dock="Bottom">
+                        <Button Content="+" Command="{Binding AddConnectionItemCommand}" ToolTip="Add new connection item" />
+                        <Button Content="-" Command="{Binding RemoveConnectionItemCommand}" ToolTip="Remove selected connection item" />
+                    </UniformGrid>
                     <ListBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ConnectionItems}"
                                                           SelectedItem="{Binding SelectedConnectionItem, Mode=TwoWay}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.Resources>
@@ -97,12 +105,15 @@
                         </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <local:ConnectionItemControl Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=ActualWidth}" />
+                                <local:ConnectionItemView Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=ActualWidth}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
+
                 <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+                <!-- Container list view -->
                 <ListView Grid.Column="2" ItemsSource="{Binding ProcessInfos}" SelectedItem="{Binding SelectedContainer}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type ListViewItem}">

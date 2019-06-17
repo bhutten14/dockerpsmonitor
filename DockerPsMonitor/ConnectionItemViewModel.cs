@@ -1,14 +1,23 @@
 ﻿using System.Security;
+using System.Windows.Input;
+using Prism.Commands;
 using Prism.Mvvm;
 
 namespace DockerPsMonitor
 {
-    public class ConnectionItemData : BindableBase
+    public class ConnectionItemViewModel : BindableBase
     {
         private string _name;
         private string _address;
         private string _userName;
         private ConnectionModeEnum _mode;
+
+        public ConnectionItemViewModel(ConnectionModeEnum mode, string name, string address)
+        {
+            _mode = mode;
+            _name = name;
+            _address = address;
+        }
 
         public ConnectionModeEnum Mode
         {

@@ -79,14 +79,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ConnectionItemControl.xaml.cs">
-      <DependentUpon>ConnectionItemControl.xaml</DependentUpon>
+    <Compile Include="ConnectionItemView.xaml.cs">
+      <DependentUpon>ConnectionItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConnectionItemData.cs" />
+    <Compile Include="ConnectionItemViewModel.cs" />
     <Compile Include="ConnectionModeEnum.cs" />
     <Compile Include="EnumBooleanConverter.cs" />
+    <Compile Include="IDockerProviderFactory.cs" />
     <Compile Include="SshDockerProvider.cs" />
-    <Page Include="ConnectionItemControl.xaml">
+    <Page Include="ConnectionItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
