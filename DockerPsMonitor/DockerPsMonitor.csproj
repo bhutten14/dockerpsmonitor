@@ -84,7 +84,11 @@
     </Compile>
     <Compile Include="ConnectionItemViewModel.cs" />
     <Compile Include="ConnectionModeEnum.cs" />
+    <Compile Include="ConnectionsRepository.cs" />
+    <Compile Include="ConnectionStruct.cs" />
+    <Compile Include="DockerProviderFactory.cs" />
     <Compile Include="EnumBooleanConverter.cs" />
+    <Compile Include="IConnectionsRepository.cs" />
     <Compile Include="IDockerProviderFactory.cs" />
     <Compile Include="SshDockerProvider.cs" />
     <Page Include="ConnectionItemView.xaml">

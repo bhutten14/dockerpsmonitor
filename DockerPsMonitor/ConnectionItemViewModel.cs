@@ -12,7 +12,8 @@ namespace DockerPsMonitor
         private string _userName;
         private ConnectionModeEnum _mode;
 
-        public ConnectionItemViewModel(ConnectionModeEnum mode, string name, string address)
+        public ConnectionItemViewModel(IConnectionsRepository connectionsRepository, ConnectionModeEnum mode,
+            string name, string address)
         {
             _mode = mode;
             _name = name;

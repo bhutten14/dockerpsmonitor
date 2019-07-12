@@ -19,7 +19,7 @@ namespace DockerPsMonitor
 
         public string GetConnectionInfo()
         {
-            return "local cmd";
+            return "local CMD";
         }
 
         public Task<string> GetLogAsync(string containerId)
