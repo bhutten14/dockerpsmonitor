@@ -11,7 +11,7 @@ namespace DockerPsMonitor
         {
             var mainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(new DockerProviderFactory())
+                DataContext = new MainWindowViewModel(new DockerProviderFactory(), new ConnectionsRepository())
             };
             mainWindow.ShowDialog();
         }

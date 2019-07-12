@@ -23,10 +23,16 @@ namespace DockerPsMonitor
         private ObservableCollection<ConnectionItemViewModel> _connectionItems;
         private ConnectionItemViewModel _selectedConnectionItem;
         private readonly IDockerProviderFactory _dockerProviderFactory;
+        private bool _dockerProviderAvailable;
+        private IConnectionsRepository _connectionsRepository;
+        private bool _showConnectionsPanel;
+        private bool _showRefreshing;
+        private bool _showContainerListEmpty;
 
-        public MainWindowViewModel(IDockerProviderFactory dockerProviderFactory)
+        public MainWindowViewModel(IDockerProviderFactory dockerProviderFactory, IConnectionsRepository connectionsRepository)
         {
             _dockerProviderFactory = dockerProviderFactory;
+            _connectionsRepository = connectionsRepository;
             ReadConnections();
             RefreshRate = 2;
             ShowExitedContainers = true;
@@ -39,6 +45,8 @@ namespace DockerPsMonitor
             RemoveCommand = new DelegateCommand(OnRemove, CanViewLog).ObservesProperty(() => SelectedContainer);
             AddConnectionItemCommand = new DelegateCommand(OnAddConnectionItem);
             RemoveConnectionItemCommand = new DelegateCommand(OnRemoveConnectionItem, CanRemoveConnectionItem).ObservesProperty(() => SelectedConnectionItem);
+            ConnectionInfoCommand = new DelegateCommand(OnConnectionInfo);
+            ReconnectCommand = new DelegateCommand(OnReconnectCommand);
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0) };
             _timer.Tick += OnTimerElapsed;
             _timer.Start();
@@ -101,6 +109,10 @@ namespace DockerPsMonitor
 
         public ICommand RemoveConnectionItemCommand { get; set; }
 
+        public ICommand ConnectionInfoCommand { get; set; }
+
+        public ICommand ReconnectCommand { get; set; }
+
         public string DockerCommandError
         {
             get => _dockerCommandError;
@@ -112,15 +124,50 @@ namespace DockerPsMonitor
             get => _selectedConnectionItem;
             set
             {
+                ShowRefreshing = true;
+                ShowContainerListEmpty = false;
+                _connectionsRepository.SaveAllConnections(ConnectionItems.ToList());
                 _timer?.Stop();
                 _processInfos.Clear();
                 SetProperty(ref _selectedConnectionItem, value);
-                if (SelectedConnectionItem != null)
+                try
                 {
-                    _dockerProvider = _dockerProviderFactory.CreateDockerProvider(SelectedConnectionItem);
+                    _dockerProvider = _dockerProviderFactory.CreateDockerProvider(value);
+                    DockerProviderAvailable = true;
+                    _timer?.Start();
                 }
-                _timer?.Start();
+                catch
+                {
+                    ShowRefreshing = false;
+                    ShowContainerListEmpty = false;
+                    DockerProviderAvailable = false;
+                }
+                RaisePropertyChanged(nameof(ConnectionInfo));
             }
+        }
+
+        public bool DockerProviderAvailable
+        {
+            get => _dockerProviderAvailable;
+            set => SetProperty(ref _dockerProviderAvailable, value);
+        }
+
+        public bool ShowConnectionsPanel
+        {
+            get => _showConnectionsPanel;
+            set => SetProperty(ref _showConnectionsPanel, value);
+        }
+
+        public bool ShowRefreshing
+        {
+            get => _showRefreshing;
+            set => SetProperty(ref _showRefreshing, value);
+        }
+
+        public bool ShowContainerListEmpty
+        {
+            get => _showContainerListEmpty;
+            set => SetProperty(ref _showContainerListEmpty, value);
         }
 
         public string ConnectionInfo => _dockerProvider.GetConnectionInfo();
@@ -233,6 +280,10 @@ namespace DockerPsMonitor
 
         private async Task RefreshProcessInfoAsync()
         {
+            if (!ShowContainerListEmpty && ProcessInfos.Count == 0)
+            {
+                ShowRefreshing = true;
+            }
             var updatedProcessInfos = new List<DockerProcessInfo>();
             DockerCommandError = null;
             try
@@ -262,11 +313,13 @@ namespace DockerPsMonitor
                 toBeUpdatedItem.Names = dockerProcessInfo.Names;
                 toBeUpdatedItem.Ports = dockerProcessInfo.Ports;
             }
+            ShowRefreshing = false;
+            ShowContainerListEmpty = ProcessInfos.Count == 0;
         }
 
         private void OnAddConnectionItem()
         {
-            var newItem = new ConnectionItemViewModel(ConnectionModeEnum.SSH, "New item", "");
+            var newItem = new ConnectionItemViewModel(_connectionsRepository, ConnectionModeEnum.SSH, "New item", "");
             ConnectionItems.Add(newItem);
             SelectedConnectionItem = newItem;
         }
@@ -284,14 +337,25 @@ namespace DockerPsMonitor
         {
             return SelectedConnectionItem?.Mode != ConnectionModeEnum.CMD;
         }
+        
+        private void OnConnectionInfo()
+        {
+            ShowConnectionsPanel = !ShowConnectionsPanel;
+        }
+
+        private void OnReconnectCommand()
+        {
+            SelectedConnectionItem = SelectedConnectionItem;
+        }
 
         private void ReadConnections()
         {
             //Default one connection is available, knowing the CMD mode connection
             _connectionItems = new ObservableCollection<ConnectionItemViewModel>
             {
-                new ConnectionItemViewModel(ConnectionModeEnum.CMD, "local cmd", "local cmd")
+                new ConnectionItemViewModel(_connectionsRepository, ConnectionModeEnum.CMD, "local cmd", "local cmd")
             };
+            _connectionItems.AddRange(_connectionsRepository.GetAllConnections());
             SelectedConnectionItem = _connectionItems.First();
         }
     }

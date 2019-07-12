@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace DockerPsMonitor
 {
@@ -10,6 +12,18 @@ namespace DockerPsMonitor
         public ConnectionItemView()
         {
             InitializeComponent();
+            PwdBox.Password = "ABCDEFGHIJKLMNOP";
+        }
+
+        private void OnPasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext == null)
+            {
+                return;
+            }
+            var pwd = (PasswordBox) sender;
+            var connectionItem = (ConnectionItemViewModel)DataContext;
+            connectionItem.Password = pwd.SecurePassword;
         }
     }
 }

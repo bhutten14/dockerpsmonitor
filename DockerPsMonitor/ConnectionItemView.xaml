@@ -27,7 +27,7 @@
                     <TextBlock Text="User name:" />
                     <TextBox Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Text="Password:" />
-                    <PasswordBox  />
+                    <PasswordBox x:Name="PwdBox" PasswordChanged="OnPasswordChanged" />
                 </StackPanel>
             </StackPanel>
         </Grid>

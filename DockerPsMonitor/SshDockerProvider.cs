@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -12,10 +13,12 @@ namespace DockerPsMonitor
     public class SshDockerProvider : IDockerProvider
     {
         private SshClient _client;
+        private string _address;
 
         public SshDockerProvider(string address, string userName, SecureString password)
         {
             _client = CreateSshClient(address, userName, password);
+            _address = address;
         }
 
         public async Task<List<DockerProcessInfo>> GetContainerInfoAsync(bool includeExitedContainers)
@@ -35,9 +38,7 @@ namespace DockerPsMonitor
 
         public string GetConnectionInfo()
         {
-            var appReader = new AppSettingsReader();
-            var sshAddress = (string)appReader.GetValue("SshAddress", typeof(string));
-            return $"SSH: {sshAddress}";
+            return $"SSH: {_address}";
         }
 
         public Task<string> GetLogAsync(string containerId)
@@ -80,26 +81,13 @@ namespace DockerPsMonitor
         {
             if (password == null)
             {
-                return null;
+                throw new ArgumentException("No password available cannot make SSH connection.");
             }
 
-            _client = new SshClient(address, userName, password.ToString());
+            var pwdClear = new NetworkCredential(string.Empty, password).Password;
+            _client = new SshClient(address, userName, pwdClear);
             _client.Connect();
             return _client;
-        }
-
-        private SshClient CreateSshClient()
-        {
-            var appReader = new AppSettingsReader();
-            var sshAddress = (string)appReader.GetValue("SshAddress", typeof(string));
-            var sshUsername = (string)appReader.GetValue("SshUsername", typeof(string));
-            var sshPassword = (string)appReader.GetValue("SshPassword", typeof(string));
-            var securePassword = new SecureString();
-            foreach (var character in sshPassword)
-            {
-                securePassword.AppendChar(character);
-            }
-            return CreateSshClient(sshAddress, sshUsername, securePassword);
         }
     }
 }
